@@ -1,0 +1,17 @@
+# Role for the Agent CAPI provider in the agent namespace (as rendered by
+# `hcp create cluster agent --render`). The HyperShift operator only creates
+# the RoleBinding to it and cannot do so until this Role exists (it has no
+# "bind" permission): HostedCluster stays at
+# `failed to reconcile Agent RoleBinding: ... "capi-provider-role" not found`.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: capi-provider-role
+  namespace: <AGENT_NAMESPACE>
+rules:
+  - apiGroups:
+      - agent-install.openshift.io
+    resources:
+      - agents
+    verbs:
+      - '*'

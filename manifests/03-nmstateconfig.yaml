@@ -1,0 +1,42 @@
+# Static IPv4 for the worker host, embedded in the discovery ISO and carried
+# over to the installed node. One NMStateConfig per host (copy the document
+# to add hosts).
+# - label must match InfraEnv spec.nmStateConfigLabelSelector
+# - spec.interfaces maps the logical name used in spec.config to the NIC MAC,
+#   so the host picks its own config by MAC
+# - create it BEFORE downloading the ISO (any change regenerates it)
+apiVersion: agent-install.openshift.io/v1beta1
+kind: NMStateConfig
+metadata:
+  name: hcp-luks-worker-0
+  namespace: <AGENT_NAMESPACE>
+  labels:
+    infraenvs.agent-install.openshift.io: hcp-luks
+spec:
+  interfaces:
+    - name: eno1
+      macAddress: '<WORKER0_MAC>'
+  config:
+    interfaces:
+      - name: eno1
+        type: ethernet
+        state: up
+        mac-address: '<WORKER0_MAC>'
+        ipv4:
+          enabled: true
+          dhcp: false
+          address:
+            - ip: <WORKER0_IP>
+              prefix-length: <PREFIX_LENGTH>
+        ipv6:
+          enabled: false
+    dns-resolver:
+      config:
+        server:
+          - <DNS_SERVER>
+    routes:
+      config:
+        - destination: 0.0.0.0/0
+          next-hop-address: <GATEWAY>
+          next-hop-interface: eno1
+          table-id: 254

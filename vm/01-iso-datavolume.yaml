@@ -1,0 +1,25 @@
+# Discovery ISO imported by CDI from the assisted image service.
+# <ISO_URL> = InfraEnv status.isoDownloadURL. It embeds an api_key token:
+# inject it at apply time (see README), do not commit it.
+# If the image service route uses a private CA, add certConfigMap (ConfigMap
+# in this namespace with key ca.pem).
+# The ISO changes whenever the InfraEnv / NMStateConfig changes: delete and
+# re-import this DataVolume after such an edit.
+apiVersion: cdi.kubevirt.io/v1beta1
+kind: DataVolume
+metadata:
+  name: hcp-luks-discovery-iso
+  namespace: <AGENT_NAMESPACE>
+spec:
+  source:
+    http:
+      url: '<ISO_URL>'
+      # certConfigMap: hcp-luks-image-service-ca
+  storage:
+    accessModes:
+      - ReadWriteMany
+    volumeMode: Block
+    resources:
+      requests:
+        storage: 2Gi
+    storageClassName: ocs-storagecluster-ceph-rbd

@@ -1,0 +1,80 @@
+# Worker VM on the hub OpenShift Virtualization.
+# - persistent vTPM: keeps the TPM state (and so the sealed LUKS key) across
+#   VM restarts and migrations. Requires HyperConverged
+#   spec.vmStateStorageClass (filesystem volume mode, RWX for live migration).
+# - persistent UEFI + Secure Boot (SMM required).
+# - no macAddress: kubemacpool (on by default in OpenShift Virtualization)
+#   assigns one at creation and writes it into the VM spec, so it stays
+#   stable. Copy it to <WORKER0_MAC> in manifests/03-nmstateconfig.yaml.
+# - created Halted: the discovery ISO only exists once the NMStateConfig
+#   holds the MAC. Start it after the ISO DataVolume is imported (README).
+#   Re-applying this file sets runStrategy back to Halted and stops the VM.
+# - boot order: root disk first (blank until installed, so firmware falls
+#   through to the ISO), discovery ISO second.
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: hcp-luks-worker-0
+  namespace: <AGENT_NAMESPACE>
+spec:
+  runStrategy: Halted
+  dataVolumeTemplates:
+    - metadata:
+        name: hcp-luks-worker-0-root
+      spec:
+        source:
+          blank: {}
+        storage:
+          accessModes:
+            - ReadWriteMany
+          volumeMode: Block
+          resources:
+            requests:
+              storage: 120Gi
+          storageClassName: ocs-storagecluster-ceph-rbd-virtualization
+  template:
+    metadata:
+      labels:
+        kubevirt.io/domain: hcp-luks-worker-0
+    spec:
+      domain:
+        cpu:
+          cores: 8
+        memory:
+          guest: 16Gi
+        features:
+          smm:
+            enabled: true
+        firmware:
+          bootloader:
+            efi:
+              secureBoot: true
+              persistent: true
+        devices:
+          tpm:
+            persistent: true
+          disks:
+            - name: rootdisk
+              bootOrder: 1
+              disk:
+                bus: virtio
+            - name: discovery-iso
+              bootOrder: 2
+              cdrom:
+                bus: sata
+          interfaces:
+            - name: nic0
+              model: virtio
+              bridge: {}
+      networks:
+        - name: nic0
+          multus:
+            networkName: <NAD_NAMESPACE>/<NAD_NAME>
+      volumes:
+        - name: rootdisk
+          dataVolume:
+            name: hcp-luks-worker-0-root
+        - name: discovery-iso
+          dataVolume:
+            name: hcp-luks-discovery-iso
+

@@ -6,7 +6,7 @@ apiVersion: agent-install.openshift.io/v1beta1
 kind: InfraEnv
 metadata:
   name: hcp-luks
-  namespace: hcp-luks-agents
+  namespace: <AGENT_NAMESPACE>
 spec:
   pullSecretRef:
     name: hcp-luks-pull-secret
@@ -14,3 +14,7 @@ spec:
   cpuArchitecture: x86_64
   agentLabels:
     hcp-luks.example.com/tpm2: "true"
+  # Static IPv4: embeds every matching NMStateConfig (03-nmstateconfig.yaml)
+  nmStateConfigLabelSelector:
+    matchLabels:
+      infraenvs.agent-install.openshift.io: hcp-luks

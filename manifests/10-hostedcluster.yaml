@@ -5,7 +5,7 @@ metadata:
   namespace: clusters
 spec:
   release:
-    image: quay.io/openshift-release-dev/ocp-release:<OCP_VERSION>-x86_64
+    image: quay.io/openshift-release-dev/ocp-release:4.22.15-x86_64
   pullSecret:
     name: hcp-luks-pull-secret
   sshKey:
@@ -14,7 +14,9 @@ spec:
   dns:
     baseDomain: <BASE_DOMAIN>
   controllerAvailabilityPolicy: HighlyAvailable
-  infrastructureAvailabilityPolicy: HighlyAvailable
+  # Single worker: run guest infra components (ingress router, etc.) with
+  # 1 replica, otherwise the 2nd replica stays Pending.
+  infrastructureAvailabilityPolicy: SingleReplica
   olmCatalogPlacement: management
   fips: false
   networking:
@@ -28,7 +30,7 @@ spec:
   platform:
     type: Agent
     agent:
-      agentNamespace: hcp-luks-agents
+      agentNamespace: <AGENT_NAMESPACE>
   etcd:
     managementType: Managed
     managed:
@@ -36,7 +38,7 @@ spec:
         type: PersistentVolume
         persistentVolume:
           size: 8Gi
-          storageClassName: <ETCD_STORAGE_CLASS>
+          storageClassName: ocs-storagecluster-ceph-rbd
   services:
     # LoadBalancer needs MetalLB (or equivalent) on the hub.
     # Alternative: type NodePort with nodePort.address set to a hub node/VIP.

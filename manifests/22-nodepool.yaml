@@ -5,12 +5,14 @@ metadata:
   namespace: clusters
 spec:
   clusterName: hcp-luks
-  replicas: 3
+  replicas: 1
   arch: amd64
   release:
-    image: quay.io/openshift-release-dev/ocp-release:<OCP_VERSION>-x86_64
+    image: quay.io/openshift-release-dev/ocp-release:4.22.15-x86_64
   # LUKS is first-boot only: Replace reprovisions nodes on config change.
   # InPlace would not encrypt existing disks.
+  # Single worker, no spare Agent: a replace removes the only node first
+  # (workload outage until the host is reinstalled).
   management:
     autoRepair: false
     upgradeType: Replace

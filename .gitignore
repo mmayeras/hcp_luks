@@ -1,1 +1,4 @@
 .claude/settings.local.json
+# real values (deploy copies), never commit
+.local/
+*.iso
