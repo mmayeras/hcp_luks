@@ -12,6 +12,10 @@ spec:
     name: hcp-luks-pull-secret
   sshAuthorizedKey: '<SSH_PUBLIC_KEY>'
   cpuArchitecture: x86_64
+  # Discovery image only: console password for user core (debug when the
+  # host is unreachable, e.g. wrong static IP). Changing it regenerates the ISO.
+  # The installed node gets its password from 21-nodepool-config-core-password.yaml.
+  ignitionConfigOverride: '{"ignition":{"version":"3.1.0"},"passwd":{"users":[{"name":"core","passwordHash":"<CORE_PASSWORD_HASH>"}]}}'
   agentLabels:
     hcp-luks.example.com/tpm2: "true"
   # Static IPv4: embeds every matching NMStateConfig (03-nmstateconfig.yaml)

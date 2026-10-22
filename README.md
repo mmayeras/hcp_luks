@@ -14,7 +14,7 @@ Target: OpenShift 4.22 (release image `4.22.15` in `10-hostedcluster.yaml` and `
 |---|---|
 | `manifests/00-namespaces.yaml` | `clusters` (HostedCluster, NodePool, config ConfigMaps). InfraEnv, NMStateConfig, Agents and the worker VM go in the agent namespace `<AGENT_NAMESPACE>`, which must already exist. The control plane namespace `clusters-hcp-luks` is created by HyperShift. |
 | `manifests/01-secrets.yaml` | Pull secret (in both namespaces) and SSH public key. |
-| `manifests/02-infraenv.yaml` | Discovery ISO for the workers. Labels every Agent `hcp-luks.example.com/tpm2: "true"`. |
+| `manifests/02-infraenv.yaml` | Discovery ISO for the workers. Labels every Agent `hcp-luks.example.com/tpm2: "true"`, and sets a `core` console password on the discovery image (`ignitionConfigOverride`). |
 | `manifests/03-nmstateconfig.yaml` | NMStateConfig for the single worker: static IPv4, gateway, DNS, matched to the host by NIC MAC. Embedded in the ISO via the InfraEnv `nmStateConfigLabelSelector` and kept on the installed node. |
 | `manifests/04-agent-rbac.yaml` | Role `capi-provider-role` in the agent namespace. HyperShift binds the Agent CAPI provider to it; without it the HostedCluster never creates its control plane. |
 | `manifests/10-hostedcluster.yaml` | Hosted control plane: release, networking, managed etcd, service publishing (API via LoadBalancer, others via Route). |
@@ -50,7 +50,7 @@ Fill the placeholders:
 | `<SSH_PUBLIC_KEY>` | `01-secrets.yaml`, `02-infraenv.yaml` |
 | `<WORKER0_MAC>`, `<WORKER0_IP>`, `<PREFIX_LENGTH>`, `<GATEWAY>`, `<DNS_SERVER>` | `03-nmstateconfig.yaml` (copy the document to add hosts) |
 | `<BASE_DOMAIN>`, `<WORKER_MACHINE_CIDR>` | `10-hostedcluster.yaml` |
-| `<CORE_PASSWORD_HASH>` | `21-nodepool-config-core-password.yaml` (generate with `openssl passwd -6`, keep the single quotes) |
+| `<CORE_PASSWORD_HASH>` | `21-nodepool-config-core-password.yaml` (installed node) and `02-infraenv.yaml` (discovery image, inside the `ignitionConfigOverride` JSON) (generate with `openssl passwd -6`, keep the single quotes) |
 | `<NAD_NAMESPACE>/<NAD_NAME>` | `vm/02-worker-vm.yaml` (VM flow only) |
 
 Storage classes default to the ODF ones (`ocs-storagecluster-ceph-rbd*`); change them if your hub uses others.
