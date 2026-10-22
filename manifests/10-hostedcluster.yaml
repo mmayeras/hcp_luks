@@ -1,0 +1,54 @@
+apiVersion: hypershift.openshift.io/v1beta1
+kind: HostedCluster
+metadata:
+  name: hcp-luks
+  namespace: clusters
+spec:
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:<OCP_VERSION>-x86_64
+  pullSecret:
+    name: hcp-luks-pull-secret
+  sshKey:
+    name: hcp-luks-ssh-key
+  infraID: hcp-luks
+  dns:
+    baseDomain: <BASE_DOMAIN>
+  controllerAvailabilityPolicy: HighlyAvailable
+  infrastructureAvailabilityPolicy: HighlyAvailable
+  olmCatalogPlacement: management
+  fips: false
+  networking:
+    networkType: OVNKubernetes
+    clusterNetwork:
+      - cidr: 10.132.0.0/14
+    serviceNetwork:
+      - cidr: 172.31.0.0/16
+    machineNetwork:
+      - cidr: <WORKER_MACHINE_CIDR>
+  platform:
+    type: Agent
+    agent:
+      agentNamespace: hcp-luks-agents
+  etcd:
+    managementType: Managed
+    managed:
+      storage:
+        type: PersistentVolume
+        persistentVolume:
+          size: 8Gi
+          storageClassName: <ETCD_STORAGE_CLASS>
+  services:
+    # LoadBalancer needs MetalLB (or equivalent) on the hub.
+    # Alternative: type NodePort with nodePort.address set to a hub node/VIP.
+    - service: APIServer
+      servicePublishingStrategy:
+        type: LoadBalancer
+    - service: OAuthServer
+      servicePublishingStrategy:
+        type: Route
+    - service: Konnectivity
+      servicePublishingStrategy:
+        type: Route
+    - service: Ignition
+      servicePublishingStrategy:
+        type: Route

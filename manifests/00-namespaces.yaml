@@ -1,0 +1,13 @@
+# Hub namespaces.
+# - clusters: holds HostedCluster, NodePool and NodePool config ConfigMaps.
+#   HyperShift creates the control plane namespace "clusters-hcp-luks" itself.
+# - hcp-luks-agents: holds InfraEnv and Agents (bare metal hosts with TPM 2.0).
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: clusters
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hcp-luks-agents

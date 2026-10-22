@@ -1,0 +1,39 @@
+# NodePool config: ConfigMap in the NodePool namespace, key "config",
+# value = MachineConfig. The HyperShift ignition server renders it into
+# the worker ignition payload, so it applies at FIRST BOOT only.
+#
+# Encrypts the RHCOS root partition with LUKS2, key sealed by the host TPM 2.0
+# (Clevis tpm2 pin). Equivalent Butane source: butane/worker-luks-tpm2.bu
+#
+# Disk encryption cannot be applied in place to an existing node: keep the
+# NodePool on upgradeType Replace so nodes are reprovisioned.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hcp-luks-worker-luks-tpm2
+  namespace: clusters
+data:
+  config: |
+    apiVersion: machineconfiguration.openshift.io/v1
+    kind: MachineConfig
+    metadata:
+      name: 99-worker-luks-tpm2
+      labels:
+        machineconfiguration.openshift.io/role: worker
+    spec:
+      config:
+        ignition:
+          version: 3.4.0
+        storage:
+          luks:
+            - name: root
+              label: luks-root
+              device: /dev/disk/by-partlabel/root
+              clevis:
+                tpm2: true
+              wipeVolume: true
+          filesystems:
+            - device: /dev/mapper/root
+              format: xfs
+              label: root
+              wipeFilesystem: true

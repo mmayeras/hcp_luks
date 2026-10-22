@@ -1,0 +1,10 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - 00-namespaces.yaml
+  - 01-secrets.yaml
+  - 02-infraenv.yaml
+  - 10-hostedcluster.yaml
+  - 20-nodepool-config-luks-tpm2.yaml
+  - 21-nodepool-config-core-password.yaml
+  - 22-nodepool.yaml

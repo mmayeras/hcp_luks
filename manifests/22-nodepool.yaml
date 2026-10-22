@@ -1,0 +1,30 @@
+apiVersion: hypershift.openshift.io/v1beta1
+kind: NodePool
+metadata:
+  name: hcp-luks-workers
+  namespace: clusters
+spec:
+  clusterName: hcp-luks
+  replicas: 3
+  arch: amd64
+  release:
+    image: quay.io/openshift-release-dev/ocp-release:<OCP_VERSION>-x86_64
+  # LUKS is first-boot only: Replace reprovisions nodes on config change.
+  # InPlace would not encrypt existing disks.
+  management:
+    autoRepair: false
+    upgradeType: Replace
+    replace:
+      strategy: RollingUpdate
+      rollingUpdate:
+        maxSurge: 0
+        maxUnavailable: 1
+  platform:
+    type: Agent
+    agent:
+      agentLabelSelector:
+        matchLabels:
+          hcp-luks.example.com/tpm2: "true"
+  config:
+    - name: hcp-luks-worker-luks-tpm2
+    - name: hcp-luks-worker-core-password

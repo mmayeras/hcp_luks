@@ -1,0 +1,16 @@
+# Discovery ISO source for worker hosts.
+# agentLabels are stamped on every Agent registering through this InfraEnv,
+# so the NodePool agentLabelSelector only picks hosts booted from it.
+# Only boot hosts with TPM 2.0 enabled in firmware from this ISO.
+apiVersion: agent-install.openshift.io/v1beta1
+kind: InfraEnv
+metadata:
+  name: hcp-luks
+  namespace: hcp-luks-agents
+spec:
+  pullSecretRef:
+    name: hcp-luks-pull-secret
+  sshAuthorizedKey: '<SSH_PUBLIC_KEY>'
+  cpuArchitecture: x86_64
+  agentLabels:
+    hcp-luks.example.com/tpm2: "true"

@@ -1,0 +1,15 @@
+# Source for the MachineConfig embedded in
+# manifests/20-nodepool-config-luks-tpm2.yaml
+#   butane worker-luks-tpm2.bu -o 99-worker-luks-tpm2.yaml
+# Butane 0.23 supports openshift variant up to 4.18.0. Output (ignition 3.4.0)
+# is valid on OCP 4.14+, so 4.18.0 is fine for a 4.20 hosted cluster.
+variant: openshift
+version: 4.18.0
+metadata:
+  name: 99-worker-luks-tpm2
+  labels:
+    machineconfiguration.openshift.io/role: worker
+boot_device:
+  layout: x86_64
+  luks:
+    tpm2: true
